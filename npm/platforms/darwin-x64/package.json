@@ -1,14 +1,20 @@
 {
-  "name": "@byebyecode/ccline-88cc-darwin-x64",
-  "version": "0.0.0",
+  "name": "@gary-50/ccline-88cc-darwin-x64",
+  "version": "1.0.8",
   "description": "macOS x64 binary for ccline-88cc",
-  "files": ["ccline-88cc"],
-  "os": ["darwin"],
-  "cpu": ["x64"],
+  "files": [
+    "ccline-88cc"
+  ],
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "x64"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/byebye-code/ccline-88cc"
+    "url": "https://github.com/gary-50/CCometixLine_termux"
   },
-  "author": "Hobee Liu",
+  "author": "gary-50",
   "license": "MIT"
 }

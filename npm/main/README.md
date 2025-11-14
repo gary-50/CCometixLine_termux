@@ -1,11 +1,11 @@
-# @byebyecode/ccline-88cc
+# @gary-50/ccline-88cc
 
 ccline-88cc - High-performance Claude Code StatusLine tool
 
 ## Installation
 
 ```bash
-npm install -g @byebyecode/ccline-88cc
+npm install -g @gary-50/ccline-88cc
 ```
 
 ## Features
@@ -33,11 +33,11 @@ ccline-88cc --version
 Use npm mirror for faster installation:
 
 ```bash
-npm install -g @hobeeliu/ccline-88cc --registry https://registry.npmmirror.com
+npm install -g @gary-50/ccline-88cc --registry https://registry.npmmirror.com
 ```
 
 ## More Information
 
-- GitHub: https://github.com/byebye-code/ccline-88cc
-- Issues: https://github.com/byebye-code/ccline-88cc/issues
+- GitHub: https://github.com/gary-50/CCometixLine_termux
+- Issues: https://github.com/gary-50/CCometixLine_termux/issues
 - License: MIT

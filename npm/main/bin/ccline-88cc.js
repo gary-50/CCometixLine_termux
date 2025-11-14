@@ -67,13 +67,13 @@ if (platform === 'linux') {
 }
 
 const packageMap = {
-  'darwin-x64': '@byebyecode/ccline-88cc-darwin-x64',
-  'darwin-arm64': '@byebyecode/ccline-88cc-darwin-arm64',
-  'linux-x64': '@byebyecode/ccline-88cc-linux-x64',
-  'linux-x64-musl': '@byebyecode/ccline-88cc-linux-x64-musl',
-  'linux-arm64': '@byebyecode/ccline-88cc-linux-arm64',
-  'win32-x64': '@byebyecode/ccline-88cc-win32-x64',
-  'win32-ia32': '@byebyecode/ccline-88cc-win32-x64', // Use 64-bit for 32-bit systems
+  'darwin-x64': '@gary-50/ccline-88cc-darwin-x64',
+  'darwin-arm64': '@gary-50/ccline-88cc-darwin-arm64',
+  'linux-x64': '@gary-50/ccline-88cc-linux-x64',
+  'linux-x64-musl': '@gary-50/ccline-88cc-linux-x64-musl',
+  'linux-arm64': '@gary-50/ccline-88cc-linux-arm64',
+  'win32-x64': '@gary-50/ccline-88cc-win32-x64',
+  'win32-ia32': '@gary-50/ccline-88cc-win32-x64', // Use 64-bit for 32-bit systems
 };
 
 const packageName = packageMap[platformKey];
@@ -83,7 +83,7 @@ if (!packageName) {
     console.error('Detected Termux environment. Please run `cargo build --release` and copy the binary to ~/.claude/ccline/ccline-88cc.');
   } else {
     console.error('Supported platforms: darwin (x64/arm64), linux (x64/arm64), win32 (x64)');
-    console.error('Please visit https://github.com/byebye-code/ccline-88cc for manual installation or building from source.');
+    console.error('Please visit https://github.com/gary-50/CCometixLine_termux for manual installation or building from source.');
   }
   process.exit(1);
 }
@@ -94,7 +94,7 @@ const binaryPath = path.join(__dirname, '..', 'node_modules', packageName, binar
 if (!fs.existsSync(binaryPath)) {
   console.error(`Error: Binary not found at ${binaryPath}`);
   console.error('This might indicate a failed installation or unsupported platform.');
-  console.error('Please try reinstalling: npm install -g @byebyecode/ccline-88cc');
+  console.error('Please try reinstalling: npm install -g @gary-50/ccline-88cc');
   console.error(`Expected package: ${packageName}`);
   process.exit(1);
 }

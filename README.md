@@ -12,7 +12,7 @@ A high-performance Claude Code statusline tool written in Rust with Git integrat
 
 ![Language:Rust](https://img.shields.io/static/v1?label=Language&message=Rust&color=orange&style=flat-square)
 ![License:MIT](https://img.shields.io/static/v1?label=License&message=MIT&color=blue&style=flat-square)
-[![CI](https://github.com/byebye-code/ccline-88cc/actions/workflows/ci.yml/badge.svg)](https://github.com/byebye-code/ccline-88cc/actions/workflows/ci.yml)
+[![CI](https://github.com/gary-50/CCometixLine_termux/actions/workflows/ci.yml/badge.svg)](https://github.com/gary-50/CCometixLine_termux/actions/workflows/ci.yml)
 
 ## Screenshots
 
@@ -55,18 +55,18 @@ Install via npm (works on all platforms, including Termux on Android):
 
 ```bash
 # Install globally
-npm install -g @byebyecode/ccline-88cc
+npm install -g @gary-50/ccline-88cc
 
 # Or using yarn
-yarn global add @byebyecode/ccline-88cc
+yarn global add @gary-50/ccline-88cc
 
 # Or using pnpm
-pnpm add -g @byebyecode/ccline-88cc
+pnpm add -g @gary-50/ccline-88cc
 ```
 
 Use npm mirror for faster download:
 ```bash
-npm install -g @byebyecode/ccline-88cc --registry https://registry.npmmirror.com
+npm install -g @gary-50/ccline-88cc --registry https://registry.npmmirror.com
 ```
 
 After installation:
@@ -116,20 +116,20 @@ Add to your Claude Code `settings.json`:
 ### Update
 
 ```bash
-npm update -g @byebyecode/ccline-88cc
+npm update -g @gary-50/ccline-88cc
 ```
 
 <details>
 <summary>Manual Installation (Click to expand)</summary>
 
-Alternatively, download from [Releases](https://github.com/byebye-code/ccline-88cc/releases):
+Alternatively, download from [Releases](https://github.com/gary-50/CCometixLine_termux/releases):
 
 #### Linux
 
 #### Option 1: Dynamic Binary (Recommended)
 ```bash
 mkdir -p ~/.claude/ccline
-wget https://github.com/byebye-code/ccline-88cc/releases/latest/download/ccline-88cc-linux-x64.tar.gz
+wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-linux-x64.tar.gz
 tar -xzf ccline-88cc-linux-x64.tar.gz
 cp ccline-88cc ~/.claude/ccline/
 chmod +x ~/.claude/ccline/ccline-88cc
@@ -139,7 +139,7 @@ chmod +x ~/.claude/ccline/ccline-88cc
 #### Option 2: Static Binary (Universal Compatibility)
 ```bash
 mkdir -p ~/.claude/ccline
-wget https://github.com/byebye-code/ccline-88cc/releases/latest/download/ccline-88cc-linux-x64-static.tar.gz
+wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-linux-x64-static.tar.gz
 tar -xzf ccline-88cc-linux-x64-static.tar.gz
 cp ccline-88cc ~/.claude/ccline/
 chmod +x ~/.claude/ccline/ccline-88cc
@@ -149,7 +149,7 @@ chmod +x ~/.claude/ccline/ccline-88cc
 #### Termux / Linux ARM64 (Android, Raspberry Pi, etc.)
 ```bash
 mkdir -p ~/.claude/ccline
-wget https://github.com/byebye-code/ccline-88cc/releases/latest/download/ccline-88cc-linux-arm64.tar.gz
+wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-linux-arm64.tar.gz
 tar -xzf ccline-88cc-linux-arm64.tar.gz
 cp ccline-88cc ~/.claude/ccline/
 chmod +x ~/.claude/ccline/ccline-88cc
@@ -160,7 +160,7 @@ chmod +x ~/.claude/ccline/ccline-88cc
 
 ```bash  
 mkdir -p ~/.claude/ccline
-wget https://github.com/byebye-code/ccline-88cc/releases/latest/download/ccline-88cc-macos-x64.tar.gz
+wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-macos-x64.tar.gz
 tar -xzf ccline-88cc-macos-x64.tar.gz
 cp ccline-88cc ~/.claude/ccline/
 chmod +x ~/.claude/ccline/ccline-88cc
@@ -170,7 +170,7 @@ chmod +x ~/.claude/ccline/ccline-88cc
 
 ```bash
 mkdir -p ~/.claude/ccline  
-wget https://github.com/byebye-code/ccline-88cc/releases/latest/download/ccline-88cc-macos-arm64.tar.gz
+wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-macos-arm64.tar.gz
 tar -xzf ccline-88cc-macos-arm64.tar.gz
 cp ccline-88cc ~/.claude/ccline/
 chmod +x ~/.claude/ccline/ccline-88cc
@@ -181,7 +181,7 @@ chmod +x ~/.claude/ccline/ccline-88cc
 ```powershell
 # Create directory and download
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\ccline-88cc"
-Invoke-WebRequest -Uri "https://github.com/byebye-code/ccline-88cc/releases/latest/download/ccline-88cc-windows-x64.zip" -OutFile "ccline-88cc-windows-x64.zip"
+Invoke-WebRequest -Uri "https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-windows-x64.zip" -OutFile "ccline-88cc-windows-x64.zip"
 Expand-Archive -Path "ccline-88cc-windows-x64.zip" -DestinationPath "."
 Move-Item "ccline-88cc.exe" "$env:USERPROFILE\.claude\ccline-88cc\"
 ```
@@ -191,7 +191,7 @@ Move-Item "ccline-88cc.exe" "$env:USERPROFILE\.claude\ccline-88cc\"
 ### Build from Source
 
 ```bash
-git clone https://github.com/byebye-code/ccline-88cc.git
+git clone https://github.com/gary-50/CCometixLine_termux.git
 cd ccline-88cc
 cargo build --release
 
@@ -355,4 +355,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=byebye-code/ccline-88cc&type=Date)](https://star-history.com/#byebye-code/ccline-88cc&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=gary-50/CCometixLine_termux&type=Date)](https://star-history.com/#gary-50/CCometixLine_termux&Date)
