@@ -51,18 +51,27 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-22.04
             name: ccline-88cc-nightly-linux-x64
+            use_cross: false
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
             name: ccline-88cc-nightly-linux-x64-static
+            use_cross: false
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            name: ccline-88cc-nightly-linux-arm64
+            use_cross: true
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             name: ccline-88cc-nightly-windows-x64
+            use_cross: false
           - target: x86_64-apple-darwin
             os: macos-latest
             name: ccline-88cc-nightly-macos-x64
+            use_cross: false
           - target: aarch64-apple-darwin
             os: macos-latest
             name: ccline-88cc-nightly-macos-arm64
+            use_cross: false
 
     steps:
     - name: Checkout
@@ -88,7 +97,16 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y musl-tools
 
+    - name: Install cross
+      if: matrix.use_cross == true
+      run: cargo install cross --git https://github.com/cross-rs/cross
+
+    - name: Build binary (cross)
+      if: matrix.use_cross == true
+      run: cross build --release --target ${{ matrix.target }}
+
     - name: Build binary
+      if: matrix.use_cross != true
       run: cargo build --release --target ${{ matrix.target }}
 
     - name: Package Linux/macOS
@@ -142,6 +160,7 @@ jobs:
           echo "### 📦 Nightly Builds Available:" >> $GITHUB_STEP_SUMMARY
           echo "- Linux x64 (GNU libc)" >> $GITHUB_STEP_SUMMARY
           echo "- Linux x64 (static/musl)" >> $GITHUB_STEP_SUMMARY
+          echo "- Linux ARM64 (musl / Termux)" >> $GITHUB_STEP_SUMMARY
           echo "- Windows x64" >> $GITHUB_STEP_SUMMARY
           echo "- macOS x64 (Intel)" >> $GITHUB_STEP_SUMMARY
           echo "- macOS ARM64 (Apple Silicon)" >> $GITHUB_STEP_SUMMARY
