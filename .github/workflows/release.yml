@@ -51,7 +51,7 @@ jobs:
         targets: ${{ matrix.target }}
 
     - name: Install cross
-      if: matrix.use_cross == 'true'
+      if: matrix.use_cross == true
       run: cargo install cross --git https://github.com/cross-rs/cross
 
     - name: Install cross-compilation tools
@@ -67,11 +67,11 @@ jobs:
         sudo apt-get install -y musl-tools
 
     - name: Build binary (cross)
-      if: matrix.use_cross == 'true'
+      if: matrix.use_cross == true
       run: cross build --release --target ${{ matrix.target }}
 
     - name: Build binary
-      if: matrix.use_cross != 'true'
+      if: matrix.use_cross != true
       run: cargo build --release --target ${{ matrix.target }}
 
     - name: Package Linux/macOS
