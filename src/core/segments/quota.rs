@@ -275,6 +275,7 @@ impl Segment for QuotaSegment {
                 let total = response.credit_limit;
                 let quota_display =
                     self.format_quota(response.subscription_name.as_deref(), remaining);
+                let used = self.calculate_used(&response);
 
                 // 更新缓存（重置失败计数）
                 let new_cache = QuotaCache {
@@ -289,6 +290,7 @@ impl Segment for QuotaSegment {
                 let mut metadata = HashMap::new();
                 metadata.insert("remaining".to_string(), remaining.to_string());
                 metadata.insert("total".to_string(), total.to_string());
+                metadata.insert("used".to_string(), used.to_string());
                 metadata.insert("endpoint_used".to_string(), endpoint_url);
                 if let Some(name) = &response.subscription_name {
                     metadata.insert("subscription_name".to_string(), name.clone());
