@@ -156,9 +156,7 @@ impl QuotaSegment {
 
     fn get_cache_file_path() -> PathBuf {
         if let Some(home) = dirs::home_dir() {
-            home.join(".claude")
-                .join("ccline")
-                .join("quota_cache.json")
+            home.join(".claude").join("ccline").join("quota_cache.json")
         } else {
             PathBuf::from("quota_cache.json")
         }
@@ -275,7 +273,8 @@ impl Segment for QuotaSegment {
                 // API调用成功
                 let remaining = response.current_credits;
                 let total = response.credit_limit;
-                let quota_display = self.format_quota(response.subscription_name.as_deref(), remaining);
+                let quota_display =
+                    self.format_quota(response.subscription_name.as_deref(), remaining);
 
                 // 更新缓存（重置失败计数）
                 let new_cache = QuotaCache {
@@ -309,16 +308,17 @@ impl Segment for QuotaSegment {
 
                     // 如果连续失败少于3次，显示缓存的数据
                     if cached.consecutive_failures < 3 {
-                        let quota_display = self.format_quota(
-                            cached.subscription_name.as_deref(),
-                            cached.remaining,
-                        );
+                        let quota_display = self
+                            .format_quota(cached.subscription_name.as_deref(), cached.remaining);
 
                         let mut metadata = HashMap::new();
                         metadata.insert("remaining".to_string(), cached.remaining.to_string());
                         metadata.insert("total".to_string(), cached.total.to_string());
                         metadata.insert("cached".to_string(), "true".to_string());
-                        metadata.insert("failures".to_string(), cached.consecutive_failures.to_string());
+                        metadata.insert(
+                            "failures".to_string(),
+                            cached.consecutive_failures.to_string(),
+                        );
                         if let Some(name) = &cached.subscription_name {
                             metadata.insert("subscription_name".to_string(), name.clone());
                         }
