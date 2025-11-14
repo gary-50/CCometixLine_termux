@@ -2,357 +2,180 @@
 
 [English](README.md) | [中文](README.zh.md)
 
-A high-performance Claude Code statusline tool written in Rust with Git integration, usage tracking, interactive TUI configuration, API quota monitoring and Claude Code enhancement utilities.
-
-> **Maintained by [HoBeedzc](https://github.com/HoBeedzc)** - This is a specially adapted version of CCometixLine for 88Code service. The original CCometixLine was created by [Haleclipse](https://github.com/Haleclipse/CCometixLine) under MIT License. This project is also released under MIT License.
->
-> This project also incorporates code from another MIT-licensed project, [ccline-packycc](https://github.com/ding113/ccline-packycc), with attribution retained.
->
-> 88Code is a third-party Claude Code proxy service. This project is a voluntary third-party adaptation and is not affiliated with Anthropic or 88Code. 88Code websites: [88code](https://www.88code.org/). This project implements automatic adaptation for both endpoints.
+A Claude Code status line companion written in Rust, optimized for Termux and Android users who rely on 88Code. This fork is maintained by [gary-50](https://github.com/gary-50) and ships a set of pre-built npm packages so the status line can be installed on **any** platform with a single command.
 
 ![Language:Rust](https://img.shields.io/static/v1?label=Language&message=Rust&color=orange&style=flat-square)
 ![License:MIT](https://img.shields.io/static/v1?label=License&message=MIT&color=blue&style=flat-square)
 [![CI](https://github.com/gary-50/CCometixLine_termux/actions/workflows/ci.yml/badge.svg)](https://github.com/gary-50/CCometixLine_termux/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@gary-50/ccline-88cc.svg?color=cb0000&label=npm)](https://www.npmjs.com/package/@gary-50/ccline-88cc)
 
-## Screenshots
+> ### Project origins
+>
+> - The original CCometixLine was created by [Haleclipse](https://github.com/Haleclipse/CCometixLine) under the MIT license.
+> - [HoBeedzc](https://github.com/HoBeedzc) built the first 88Code adaptation.
+> - This repository continues the 88Code/Ter mux friendly work and adds npm distribution, Termux fixes, and continuous release automation. Credits for upstream code and ideas remain intact in `LICENSE`.
 
-![CCometixLine](assets/img1.png)
+---
 
-The statusline shows: Model | Directory | Git Branch Status | Context Window | API Quota
+## Highlights
 
-## Features
+- **Real-time Claude Code status line** displaying current model, workspace path, git status, context tokens and remaining 88Code quota.
+- **Cross-platform binaries** for Linux (glibc + musl), macOS (Intel + Apple Silicon), Windows, and Linux ARM64/Termux—all published on npm as optional deps.
+- **Interactive TUI** configuration (`ccline-88cc -c`) with live preview, theme presets, and per-segment toggles.
+- **Claude Code enhancer** that patches local Claude installs to remove “Context low” warnings, enable verbose output, and back up settings.
+- **Stable networking** layer with retry, caching, and offline tolerances tailored to 88Code proxy behaviour.
 
-### Core Functionality
-- **Git integration** with branch, status, and tracking info
-- **Model display** with simplified Claude model names
-- **Usage tracking** based on transcript analysis
-- **Directory display** showing current workspace
-- **API Quota display** with intelligent caching and failure recovery
-  - Smart caching mechanism for reliable quota monitoring
-  - Resilient to network interruptions (3-failure tolerance)
-  - 30-second timeout optimized for slow networks
-  - Shows remaining balance in real-time
-- **Minimal design** using Nerd Font icons
+## Table of contents
 
-### Interactive TUI Features
-- **Interactive main menu** when executed without input
-- **TUI configuration interface** with real-time preview
-- **Theme system** with multiple built-in presets
-- **Segment customization** with granular control
-- **Configuration management** (init, check, edit)
-
-### Claude Code Enhancement
-- **Context warning disabler** - Remove annoying "Context low" messages
-- **Verbose mode enabler** - Enhanced output detail
-- **Robust patcher** - Survives Claude Code version updates
-- **Automatic backups** - Safe modification with easy recovery
+1. [Installation](#installation)
+2. [Configure Claude Code](#configure-claude-code)
+3. [Manual & offline installs](#manual--offline-installs)
+4. [Usage tips](#usage-tips)
+5. [Platform packages on npm](#platform-packages-on-npm)
+6. [Development](#development)
+7. [Release workflow](#release-workflow)
+8. [FAQ](#faq)
 
 ## Installation
 
-### Quick Install (Recommended)
-
-Install via npm (works on all platforms, including Termux on Android):
+### One command via npm (recommended)
 
 ```bash
-# Install globally
+# Global install
 npm install -g @gary-50/ccline-88cc
 
-# Or using yarn
+# Or yarn
 yarn global add @gary-50/ccline-88cc
 
-# Or using pnpm
+# Or pnpm
 pnpm add -g @gary-50/ccline-88cc
 ```
 
-Use npm mirror for faster download:
+For users in China:
+
 ```bash
 npm install -g @gary-50/ccline-88cc --registry https://registry.npmmirror.com
 ```
 
 After installation:
-- ✅ Global command `ccline-88cc` is available everywhere
-- ⚙️ Follow the configuration steps below to integrate with Claude Code
-- 🎨 Run `ccline-88cc -c` to open configuration panel for theme selection
-- 📱 Termux users on Android are fully supported (ARM64 static binary)
 
-### Claude Code Configuration
+- Run `ccline-88cc` to print the status line immediately.
+- Run `ccline-88cc -c` for the interactive theme/configurator.
+- Termux users receive the static ARM64 build automatically (postinstall detects Termux and guides you through copying the binary to `~/.claude/ccline`).
 
-Add to your Claude Code `settings.json`:
+> **Need 88Code credentials?** Configure them once inside the TUI or edit `~/.claude/ccline/config.toml`.
 
-**Linux/macOS:**
+### Keeping up to date
+
+```bash
+npm update -g @gary-50/ccline-88cc
+```
+
+## Configure Claude Code
+
+Add the status line command into `settings.json`. The safest method is to point Claude to the binary placed in `~/.claude/ccline`:
+
 ```json
 {
   "statusLine": {
-    "type": "command", 
+    "type": "command",
     "command": "~/.claude/ccline/ccline-88cc",
     "padding": 0
   }
 }
 ```
 
-**Windows:**
-```json
-{
-  "statusLine": {
-    "type": "command", 
-    "command": "%USERPROFILE%\\.claude\\ccline\\ccline-88cc.exe",
-    "padding": 0
-  }
-}
-```
+If the npm global install directory is already on `PATH`, this shortcut works:
 
-**Fallback (npm installation):**
 ```json
 {
   "statusLine": {
-    "type": "command", 
+    "type": "command",
     "command": "ccline-88cc",
     "padding": 0
   }
 }
 ```
-*Use this if npm global installation is available in PATH*
 
-### Update
+Windows users can point to `%USERPROFILE%\.claude\ccline\ccline-88cc.exe`.
 
-```bash
-npm update -g @gary-50/ccline-88cc
-```
+## Manual & offline installs
 
-<details>
-<summary>Manual Installation (Click to expand)</summary>
+Download binaries from the [Releases](https://github.com/gary-50/CCometixLine_termux/releases) page:
 
-Alternatively, download from [Releases](https://github.com/gary-50/CCometixLine_termux/releases):
+| Platform | Archive | Notes |
+|----------|---------|-------|
+| Linux x64 (glibc) | `ccline-88cc-linux-x64.tar.gz` | Ubuntu 22.04+, Debian 11+, RHEL 9+ |
+| Linux x64 (musl)  | `ccline-88cc-linux-x64-static.tar.gz` | Works on Alpine / any distro |
+| Linux ARM64 | `ccline-88cc-linux-arm64.tar.gz` | Termux-friendly static build |
+| macOS Intel | `ccline-88cc-macos-x64.tar.gz` | Requires macOS 12+ |
+| macOS Apple Silicon | `ccline-88cc-macos-arm64.tar.gz` | Native arm64 build |
+| Windows x64 | `ccline-88cc-windows-x64.zip` | Extract `ccline-88cc.exe` |
 
-#### Linux
+Each archive contains a single binary. Copy it to `~/.claude/ccline/` (or `%USERPROFILE%\.claude\ccline\` on Windows) and ensure it is executable.
 
-#### Option 1: Dynamic Binary (Recommended)
-```bash
-mkdir -p ~/.claude/ccline
-wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-linux-x64.tar.gz
-tar -xzf ccline-88cc-linux-x64.tar.gz
-cp ccline-88cc ~/.claude/ccline/
-chmod +x ~/.claude/ccline/ccline-88cc
-```
-*Requires: Ubuntu 22.04+, CentOS 9+, Debian 11+, RHEL 9+ (glibc 2.35+)*
+## Usage tips
 
-#### Option 2: Static Binary (Universal Compatibility)
-```bash
-mkdir -p ~/.claude/ccline
-wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-linux-x64-static.tar.gz
-tar -xzf ccline-88cc-linux-x64-static.tar.gz
-cp ccline-88cc ~/.claude/ccline/
-chmod +x ~/.claude/ccline/ccline-88cc
-```
-*Works on any Linux distribution (static, no dependencies)*
+- `ccline-88cc` with no arguments prints the status line once; run it continuously to keep the panel current.
+- `ccline-88cc -c` opens the TUI to tweak themes, toggle segments, and update API tokens.
+- The Quota monitor retries failed requests up to three times. When offline, the last cached quota is shown.
+- Logs and config live under `~/.claude/ccline/`.
 
-#### Termux / Linux ARM64 (Android, Raspberry Pi, etc.)
-```bash
-mkdir -p ~/.claude/ccline
-wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-linux-arm64.tar.gz
-tar -xzf ccline-88cc-linux-arm64.tar.gz
-cp ccline-88cc ~/.claude/ccline/
-chmod +x ~/.claude/ccline/ccline-88cc
-```
-*Ships as a musl-linked static binary that runs natively inside Termux and other ARM64 Linux environments*
+## Platform packages on npm
 
-#### macOS (Intel)
+The main npm package (`@gary-50/ccline-88cc`) depends on optional binaries:
 
-```bash  
-mkdir -p ~/.claude/ccline
-wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-macos-x64.tar.gz
-tar -xzf ccline-88cc-macos-x64.tar.gz
-cp ccline-88cc ~/.claude/ccline/
-chmod +x ~/.claude/ccline/ccline-88cc
-```
+| npm package | Platform |
+|-------------|----------|
+| `@gary-50/ccline-88cc-darwin-x64` | macOS Intel |
+| `@gary-50/ccline-88cc-darwin-arm64` | macOS Apple Silicon |
+| `@gary-50/ccline-88cc-linux-x64` | Linux glibc |
+| `@gary-50/ccline-88cc-linux-x64-musl` | Linux musl/static |
+| `@gary-50/ccline-88cc-linux-arm64` | Linux ARM64 & Termux |
+| `@gary-50/ccline-88cc-win32-x64` | Windows x64 |
 
-#### macOS (Apple Silicon)
-
-```bash
-mkdir -p ~/.claude/ccline  
-wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-macos-arm64.tar.gz
-tar -xzf ccline-88cc-macos-arm64.tar.gz
-cp ccline-88cc ~/.claude/ccline/
-chmod +x ~/.claude/ccline/ccline-88cc
-```
-
-#### Windows
-
-```powershell
-# Create directory and download
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\ccline-88cc"
-Invoke-WebRequest -Uri "https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-windows-x64.zip" -OutFile "ccline-88cc-windows-x64.zip"
-Expand-Archive -Path "ccline-88cc-windows-x64.zip" -DestinationPath "."
-Move-Item "ccline-88cc.exe" "$env:USERPROFILE\.claude\ccline-88cc\"
-```
-
-</details>
-
-### Build from Source
-
-```bash
-git clone https://github.com/gary-50/CCometixLine_termux.git
-cd ccline-88cc
-cargo build --release
-
-# Linux/macOS
-mkdir -p ~/.claude/ccline
-cp target/release/ccometixline ~/.claude/ccline-88cc/ccline-88cc
-chmod +x ~/.claude/ccline/ccline-88cc
-
-# Windows (PowerShell)
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\ccline-88cc"
-copy target\release\ccometixline.exe "$env:USERPROFILE\.claude\ccline-88cc\ccline-88cc.exe"
-```
-
-## Usage
-
-### Configuration Management
-
-```bash
-# Initialize configuration file
-ccline-88cc --init
-
-# Check configuration validity  
-ccline-88cc --check
-
-# Print current configuration
-ccline-88cc --print
-
-# Enter TUI configuration mode
-ccline-88cc --config
-```
-
-### Theme Override
-
-```bash
-# Temporarily use specific theme (overrides config file)
-ccline-88cc --theme cometix
-ccline-88cc --theme minimal
-ccline-88cc --theme gruvbox
-ccline-88cc --theme nord
-ccline-88cc --theme powerline-dark
-
-# Or use custom theme files from ~/.claude/ccline-88cc/themes/
-ccline-88cc --theme my-custom-theme
-```
-
-### Claude Code Enhancement
-
-```bash
-# Disable context warnings and enable verbose mode
-ccline-88cc --patch /path/to/claude-code/cli.js
-
-# Example for common installation
-ccline-88cc --patch ~/.local/share/fnm/node-versions/v24.4.1/installation/lib/node_modules/@anthropic-ai/claude-code/cli.js
-```
-
-## Default Segments
-
-Displays: `Directory | Git Branch Status | Model | Context Window | API Quota`
-
-### Git Status Indicators
-
-- Branch name with Nerd Font icon
-- Status: `✓` Clean, `●` Dirty, `⚠` Conflicts  
-- Remote tracking: `↑n` Ahead, `↓n` Behind
-
-### Model Display
-
-Shows simplified Claude model names:
-- `claude-3-5-sonnet` → `Sonnet 3.5`
-- `claude-4-sonnet` → `Sonnet 4`
-
-### Context Window Display
-
-Token usage percentage based on transcript analysis with context limit tracking.
-
-### API Quota Display
-Smart monitoring of API usage with advanced reliability features:
-
-- **Usage display**: Shows subscription name and remaining credits (e.g., `PAYGO $354.27`)
-- **Auto-detection**: Automatically detects the correct API endpoint
-- **Zero configuration**: Just provide your API key, everything else is automatic
-- **Intelligent caching**:
-  - Caches successful API responses to `~/.claude/ccline/quota_cache.json`
-  - Displays cached data when API is temporarily unavailable
-  - Automatic cache updates on successful API calls
-- **Resilient failure handling**:
-  - 30-second timeout for API requests (optimized for slow networks)
-  - Continues showing cached quota for up to 2 consecutive failures
-  - Only displays "Offline" after 3 consecutive API failures
-  - Automatically recovers and resets failure counter on next successful call
-- **Performance**: Fast response time using cached data during temporary network issues
-
-Supports multiple API key sources (priority order):
-
-1. Environment variables: `C88_API_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`
-2. Claude Code settings.json (`env.ANTHROPIC_AUTH_TOKEN` or `env.ANTHROPIC_API_KEY`)
-3. Local API key file: `~/.claude/api_key`
-
-## Configuration
-
-CCometixLine supports full configuration via TOML files and interactive TUI:
-
-- **Configuration file**: `~/.claude/ccline-88cc/config.toml`
-- **Interactive TUI**: `ccline-88cc --config` for real-time editing with preview
-- **Theme files**: `~/.claude/ccline-88cc/themes/*.toml` for custom themes
-- **Automatic initialization**: `ccline-88cc --init` creates default configuration
-
-### Available Segments
-
-All segments are configurable with:
-- Enable/disable toggle
-- Custom separators and icons
-- Color customization
-- Format options
-
-Supported segments: Directory, Git, Model, Usage, Time, Cost, OutputStyle
-
-
-## Requirements
-
-- **Git**: Version 1.5+ (Git 2.22+ recommended for better branch detection)
-- **Terminal**: Must support Nerd Fonts for proper icon display
-  - Install a [Nerd Font](https://www.nerdfonts.com/) (e.g., FiraCode Nerd Font, JetBrains Mono Nerd Font)
-  - Configure your terminal to use the Nerd Font
-- **Claude Code**: For statusline integration
+Installing the main package automatically downloads the correct binary for your platform.
 
 ## Development
 
 ```bash
-# Build development version
+git clone https://github.com/gary-50/CCometixLine_termux.git
+cd CCometixLine_termux
 cargo build
-
-# Run tests
 cargo test
-
-# Build optimized release
-cargo build --release
+cargo fmt -- --check
+cargo clippy -- -D warnings
 ```
 
-## Roadmap
+CI builds the following matrices:
 
-- [x] TOML configuration file support
-- [x] TUI configuration interface
-- [x] Custom themes
-- [x] Interactive main menu
-- [x] Claude Code enhancement tools
+- Unit tests + lint on Ubuntu.
+- Nightly binaries for Linux (glibc/musl/arm64), Windows, and both macOS architectures.
 
-## Contributing
+## Release workflow
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+1. Update versions in `Cargo.toml` and every npm `package.json`.
+2. Follow `RELEASING.md` or run `npm/scripts/prepare-packages.js <version>`.
+3. Tag `vX.Y.Z` and push. GitHub Actions builds artifacts.
+4. Publish each npm binary package first, then the main npm package (automated in CI once `NODE_AUTH_TOKEN` is configured, or run locally as we did for v1.0.8).
 
-## Related Projects
+## FAQ
 
-- [tweakcc](https://github.com/Piebald-AI/tweakcc) - Command-line tool to customize your Claude Code themes, thinking verbs, and more.
-- [CCometixLine](https://github.com/Haleclipse/CCometixLine) - Original high-performance Claude Code status line tool written in Rust (upstream project).
-- [ccline-packycc](https://github.com/ding113/ccline-packycc) - Another high-performance Claude Code status line tool written in Rust.
+**Is this affiliated with Anthropic or 88Code?**  
+No. This is a community-maintained adaptation and ships under the same MIT license.
 
-## License
+**Can I use it without npm?**  
+Yes—download the binary from Releases or build from source with Cargo.
 
-This project is licensed under the [MIT License](LICENSE).
+**How do I prevent GitHub Actions from running on documentation-only commits?**  
+Add `[skip ci]` to the commit message when pushing README edits.
 
-## Star History
+## License & acknowledgements
+
+- Licensed under [MIT](LICENSE).
+- Credits to [Haleclipse](https://github.com/Haleclipse/CCometixLine) and [HoBeedzc](https://github.com/HoBeedzc) for the original codebase.
+- Extra thanks to the 88Code community for testing the Termux builds.
+
+## Star history
 
 [![Star History Chart](https://api.star-history.com/svg?repos=gary-50/CCometixLine_termux&type=Date)](https://star-history.com/#gary-50/CCometixLine_termux&Date)

@@ -2,358 +2,161 @@
 
 [English](README.md) | [中文](README.zh.md)
 
-基于 Rust 的高性能 Claude Code 状态栏工具，集成 Git 信息、使用量跟踪、交互式 TUI 配置、API 配额监控和 Claude Code 增强工具。
-
-> **由 [HoBeedzc](https://github.com/HoBeedzc) 维护** - 这是专为 88Code 服务特别适配的 CCometixLine 版本。原始 CCometixLine 由 [Haleclipse](https://github.com/Haleclipse/CCometixLine) 在 MIT 许可证下创建。本项目同样在 MIT 许可证下发布。
->
-> 本项目还整合了另一个 MIT 许可证项目 [ccline-packycc](https://github.com/ding113/ccline-packycc) 的代码，并保留了相应归属。
->
-> 88Code 是第三方 Claude Code 代理服务。本项目是自发的第三方适配，与 Anthropic 或 88Code 无关。88Code 网站：[88code](https://www.88code.org/)。本项目实现了对两个端点的自动适配。
+一个基于 Rust 的 Claude Code 状态栏工具，专为 88Code 与 Termux/Android 用户优化。当前版本由 [gary-50](https://github.com/gary-50) 维护，提供 npm 分发和多平台静态二进制，方便在任何环境一键安装。
 
 ![Language:Rust](https://img.shields.io/static/v1?label=Language&message=Rust&color=orange&style=flat-square)
 ![License:MIT](https://img.shields.io/static/v1?label=License&message=MIT&color=blue&style=flat-square)
 [![CI](https://github.com/gary-50/CCometixLine_termux/actions/workflows/ci.yml/badge.svg)](https://github.com/gary-50/CCometixLine_termux/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@gary-50/ccline-88cc.svg?color=cb0000&label=npm)](https://www.npmjs.com/package/@gary-50/ccline-88cc)
 
-## 截图
+> ### 项目来源
+>
+> - 原始 CCometixLine 由 [Haleclipse](https://github.com/Haleclipse/CCometixLine) 在 MIT 许可下发布。
+> - [HoBeedzc](https://github.com/HoBeedzc) 首次为 88Code 适配。
+> - 本仓库在其基础上继续开发，增加 npm 发布、Termux 特性的修复与自动化脚本，完整保留原作者授权信息。
 
-![CCometixLine](assets/img1.png)
+---
 
-状态栏显示：模型 | 目录 | Git 分支状态 | 上下文窗口 | API 配额
+## 核心亮点
 
-## 特性
+- **实时 Claude Code 状态栏**：模型、仓库目录、Git 状态、上下文 token 与 88Code 余额一目了然。
+- **跨平台二进制**：Linux (glibc/musl)、macOS (Intel/Apple Silicon)、Windows、Termux ARM64，一次构建全部发布。
+- **交互式 TUI**：`ccline-88cc -c` 实时预览主题、分段开关、API Key 设置。
+- **Claude 增强脚本**：自动备份、移除“Context low”警告、开启详细模式。
+- **稳健网络层**：为 88Code 代理场景设计的缓存 + 重试，离线也能显示最近余额。
 
-### 核心功能
-- **Git 集成** 显示分支、状态和跟踪信息
-- **模型显示** 简化的 Claude 模型名称
-- **使用量跟踪** 基于转录文件分析
-- **目录显示** 显示当前工作空间
-- **API 配额显示** 智能缓存和故障恢复
-  - 智能缓存机制，可靠的配额监控
-  - 网络中断时自动容错（可容忍3次失败）
-  - 30秒超时，针对慢速网络优化
-  - 实时显示剩余余额
-- **简洁设计** 使用 Nerd Font 图标
+## 目录
 
-### 交互式 TUI 功能
-- **交互式主菜单** 无输入时直接执行显示菜单
-- **TUI 配置界面** 实时预览配置效果
-- **主题系统** 多种内置预设主题
-- **段落自定义** 精细化控制各段落
-- **配置管理** 初始化、检查、编辑配置
+1. [安装方式](#安装方式)
+2. [接入 Claude Code](#接入-claude-code)
+3. [离线/手动安装](#离线手动安装)
+4. [使用提示](#使用提示)
+5. [npm 平台包](#npm-平台包)
+6. [开发与贡献](#开发与贡献)
+7. [发布流程](#发布流程)
+8. [常见问题](#常见问题)
 
-### Claude Code 增强
-- **禁用上下文警告** 移除烦人的"Context low"消息
-- **启用详细模式** 增强输出详细信息
-- **稳定补丁器** 适应 Claude Code 版本更新
-- **自动备份** 安全修改，支持轻松恢复
+## 安装方式
 
-## 安装
-
-### 快速安装（推荐）
-
-通过 npm 安装（适用于所有平台，包括 Android 上的 Termux）：
+### npm 一键安装（推荐）
 
 ```bash
-# 全局安装
 npm install -g @gary-50/ccline-88cc
-
-# 或使用 yarn
+# 或 yarn / pnpm
 yarn global add @gary-50/ccline-88cc
-
-# 或使用 pnpm
 pnpm add -g @gary-50/ccline-88cc
 ```
 
-使用镜像源加速下载：
+中国大陆可使用镜像：
+
 ```bash
 npm install -g @gary-50/ccline-88cc --registry https://registry.npmmirror.com
 ```
 
-安装后：
-- ✅ 全局命令 `ccline-88cc` 可在任何地方使用
-- ⚙️ 按照下方提示进行配置以集成到 Claude Code
-- 🎨 运行 `ccline-88cc -c` 打开配置面板进行主题选择
-- 📱 完整支持 Termux（ARM64 静态二进制）
+安装完成后：
 
-### Claude Code 配置
+- 直接运行 `ccline-88cc` 查看状态栏。
+- 执行 `ccline-88cc -c` 进入配置面板设置主题、API Key。
+- Termux 自动识别后会提示将二进制复制到 `~/.claude/ccline`。
 
-添加到 Claude Code `settings.json`：
+升级命令：
 
-**Linux/macOS:**
+```bash
+npm update -g @gary-50/ccline-88cc
+```
+
+## 接入 Claude Code
+
+在 `settings.json` 中添加：
+
 ```json
 {
   "statusLine": {
-    "type": "command", 
+    "type": "command",
     "command": "~/.claude/ccline/ccline-88cc",
     "padding": 0
   }
 }
 ```
 
-**Windows:**
-```json
-{
-  "statusLine": {
-    "type": "command", 
-    "command": "%USERPROFILE%\\.claude\\ccline\\ccline-88cc.exe",
-    "padding": 0
-  }
-}
-```
+若 npm 全局目录已加入 `PATH`，也可直接：
 
-**后备方案 (npm 安装):**
 ```json
 {
   "statusLine": {
-    "type": "command", 
+    "type": "command",
     "command": "ccline-88cc",
     "padding": 0
   }
 }
 ```
-*如果 npm 全局安装已在 PATH 中可用，则使用此配置*
 
-### 更新
+Windows 用户指向 `%USERPROFILE%\.claude\ccline\ccline-88cc.exe` 即可。
 
-```bash
-npm update -g @gary-50/ccline-88cc
-```
+## 离线/手动安装
 
-<details>
-<summary>手动安装（点击展开）</summary>
+从 [Releases](https://github.com/gary-50/CCometixLine_termux/releases) 下载对应档案，解压后将可执行文件放入 `~/.claude/ccline`（Windows 放到 `%USERPROFILE%\.claude\ccline`）。
 
-或者从 [Releases](https://github.com/gary-50/CCometixLine_termux/releases) 手动下载：
+| 平台 | 文件名 | 说明 |
+|------|--------|------|
+| Linux x64 (glibc) | `ccline-88cc-linux-x64.tar.gz` | Ubuntu 22.04+ 等 |
+| Linux x64 (musl) | `ccline-88cc-linux-x64-static.tar.gz` | 任意发行版 |
+| Linux ARM64 / Termux | `ccline-88cc-linux-arm64.tar.gz` | 静态 musl |
+| macOS Intel | `ccline-88cc-macos-x64.tar.gz` | macOS 12+ |
+| macOS Apple Silicon | `ccline-88cc-macos-arm64.tar.gz` | 原生 arm64 |
+| Windows x64 | `ccline-88cc-windows-x64.zip` | 解压后获取 `ccline-88cc.exe` |
 
-#### Linux
+## 使用提示
 
-#### 选项 1: 动态链接版本（推荐）
-```bash
-mkdir -p ~/.claude/ccline
-wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-linux-x64.tar.gz
-tar -xzf ccline-88cc-linux-x64.tar.gz
-cp ccline-88cc ~/.claude/ccline/
-chmod +x ~/.claude/ccline/ccline-88cc
-```
-*系统要求: Ubuntu 22.04+, CentOS 9+, Debian 11+, RHEL 9+ (glibc 2.35+)*
+- 无参数运行输出一次状态栏；搭配 Claude Code 会定期刷新。
+- `-c` 打开配置 TUI，可切换主题、调整段落、设置 88Code Token。
+- 网络失败会自动重试三次，离线时显示上一次缓存的余额。
+- 所有配置存放在 `~/.claude/ccline/`。
 
-#### 选项 2: 静态链接版本（通用兼容）
-```bash
-mkdir -p ~/.claude/ccline
-wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-linux-x64-static.tar.gz
-tar -xzf ccline-88cc-linux-x64-static.tar.gz
-cp ccline-88cc ~/.claude/ccline/
-chmod +x ~/.claude/ccline/ccline-88cc
-```
-*适用于任何 Linux 发行版（静态链接，无依赖）*
+## npm 平台包
 
-#### Termux / Linux ARM64（Android、树莓派等）
-```bash
-mkdir -p ~/.claude/ccline
-wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-linux-arm64.tar.gz
-tar -xzf ccline-88cc-linux-arm64.tar.gz
-cp ccline-88cc ~/.claude/ccline/
-chmod +x ~/.claude/ccline/ccline-88cc
-```
-*以 musl 静态方式构建，可直接在 Termux 及其他 ARM64 Linux 环境运行*
+主包 `@gary-50/ccline-88cc` 会根据平台自动安装下列可选依赖：
 
-#### macOS (Intel)
+| npm 包名 | 平台 |
+|----------|------|
+| `@gary-50/ccline-88cc-darwin-x64` | macOS Intel |
+| `@gary-50/ccline-88cc-darwin-arm64` | macOS Apple Silicon |
+| `@gary-50/ccline-88cc-linux-x64` | Linux glibc |
+| `@gary-50/ccline-88cc-linux-x64-musl` | Linux musl/static |
+| `@gary-50/ccline-88cc-linux-arm64` | Linux ARM64/Termux |
+| `@gary-50/ccline-88cc-win32-x64` | Windows x64 |
 
-```bash  
-mkdir -p ~/.claude/ccline
-wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-macos-x64.tar.gz
-tar -xzf ccline-88cc-macos-x64.tar.gz
-cp ccline-88cc ~/.claude/ccline/
-chmod +x ~/.claude/ccline/ccline-88cc
-```
-
-#### macOS (Apple Silicon)
-
-```bash
-mkdir -p ~/.claude/ccline  
-wget https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-macos-arm64.tar.gz
-tar -xzf ccline-88cc-macos-arm64.tar.gz
-cp ccline-88cc ~/.claude/ccline/
-chmod +x ~/.claude/ccline/ccline-88cc
-```
-
-#### Windows
-
-```powershell
-# 创建目录并下载
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\ccline-88cc"
-Invoke-WebRequest -Uri "https://github.com/gary-50/CCometixLine_termux/releases/latest/download/ccline-88cc-windows-x64.zip" -OutFile "ccline-88cc-windows-x64.zip"
-Expand-Archive -Path "ccline-88cc-windows-x64.zip" -DestinationPath "."
-Move-Item "ccline-88cc.exe" "$env:USERPROFILE\.claude\ccline-88cc\"
-```
-
-</details>
-
-### 从源码构建
+## 开发与贡献
 
 ```bash
 git clone https://github.com/gary-50/CCometixLine_termux.git
-cd ccline-88cc
-cargo build --release
-
-# Linux/macOS
-mkdir -p ~/.claude/ccline
-cp target/release/ccometixline ~/.claude/ccline-88cc/ccline-88cc
-chmod +x ~/.claude/ccline/ccline-88cc
-
-# Windows (PowerShell)
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\ccline-88cc"
-copy target\release\ccometixline.exe "$env:USERPROFILE\.claude\ccline-88cc\ccline-88cc.exe"
-```
-
-## 使用
-
-### 配置管理
-
-```bash
-# 初始化配置文件
-ccline-88cc --init
-
-# 检查配置有效性  
-ccline-88cc --check
-
-# 打印当前配置
-ccline-88cc --print
-
-# 进入 TUI 配置模式
-ccline-88cc --config
-```
-
-### 主题覆盖
-
-```bash
-# 临时使用指定主题（覆盖配置文件设置）
-ccline-88cc --theme cometix
-ccline-88cc --theme minimal
-ccline-88cc --theme gruvbox
-ccline-88cc --theme nord
-ccline-88cc --theme powerline-dark
-
-# 或使用 ~/.claude/ccline-88cc/themes/ 目录下的自定义主题
-ccline-88cc --theme my-custom-theme
-```
-
-### Claude Code 增强
-
-```bash
-# 禁用上下文警告并启用详细模式
-ccline-88cc --patch /path/to/claude-code/cli.js
-
-# 常见安装路径示例
-ccline-88cc --patch ~/.local/share/fnm/node-versions/v24.4.1/installation/lib/node_modules/@anthropic-ai/claude-code/cli.js
-```
-
-## 默认段落
-
-显示：`目录 | Git 分支状态 | 模型 | 上下文窗口 | API 配额`
-
-### Git 状态指示器
-
-- 带 Nerd Font 图标的分支名
-- 状态：`✓` 清洁，`●` 有更改，`⚠` 冲突
-- 远程跟踪：`↑n` 领先，`↓n` 落后
-
-### 模型显示
-
-显示简化的 Claude 模型名称：
-- `claude-3-5-sonnet` → `Sonnet 3.5`
-- `claude-4-sonnet` → `Sonnet 4`
-
-### 上下文窗口显示
-
-基于转录文件分析的令牌使用百分比，包含上下文限制跟踪。
-
-### API 配额显示
-智能监控 API 使用情况，具备高级可靠性特性：
-
-- **额度显示**: 显示套餐名称和剩余额度 (例如 `PAYGO $354.27`)
-- **自动检测**: 自动检测正确的 API 端点
-- **零配置**: 只需提供 API 密钥，其他都是自动的
-- **智能缓存**:
-  - 将成功的 API 响应缓存至 `~/.claude/ccline/quota_cache.json`
-  - API 临时不可用时显示缓存数据
-  - API 调用成功时自动更新缓存
-- **弹性故障处理**:
-  - API 请求超时时间为 30 秒（针对慢速网络优化）
-  - 连续失败 2 次内继续显示缓存的配额信息
-  - 仅在连续 3 次 API 调用失败后才显示 "Offline"
-  - 下次调用成功时自动恢复并重置失败计数器
-- **性能优化**: 临时网络问题时使用缓存数据，响应迅速
-
-支持多种 API 密钥来源（优先级顺序）：
-
-1. 环境变量: `C88_API_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`
-2. Claude Code settings.json（`env.ANTHROPIC_AUTH_TOKEN` 或 `env.ANTHROPIC_API_KEY`）
-3. 本地 API 密钥文件: `~/.claude/api_key`
-
-## 配置
-
-CCometixLine 支持通过 TOML 文件和交互式 TUI 进行完整配置：
-
-- **配置文件**: `~/.claude/ccline-88cc/config.toml`
-- **交互式 TUI**: `ccline-88cc --config` 实时编辑配置并预览效果
-- **主题文件**: `~/.claude/ccline-88cc/themes/*.toml` 自定义主题文件
-- **自动初始化**: `ccline-88cc --init` 创建默认配置
-
-### 可用段落
-
-所有段落都支持配置：
-- 启用/禁用切换
-- 自定义分隔符和图标
-- 颜色自定义
-- 格式选项
-
-支持的段落：目录、Git、模型、使用量、时间、成本、输出样式
-
-
-## 系统要求
-
-- **Git**: 版本 1.5+ (推荐 Git 2.22+ 以获得更好的分支检测)
-- **终端**: 必须支持 Nerd Font 图标正常显示
-  - 安装 [Nerd Font](https://www.nerdfonts.com/) 字体
-  - 中文用户推荐: [Maple Font](https://github.com/subframe7536/maple-font) (支持中文的 Nerd Font)
-  - 在终端中配置使用该字体
-- **Claude Code**: 用于状态栏集成
-
-## 开发
-
-```bash
-# 构建开发版本
+cd CCometixLine_termux
 cargo build
-
-# 运行测试
 cargo test
-
-# 构建优化版本
-cargo build --release
+cargo fmt -- --check
+cargo clippy -- -D warnings
 ```
 
-## 路线图
+CI 会运行测试、lint，并构建所有平台的 nightly 版本。欢迎提交 Issue / PR（提交说明中可加入 `[skip ci]` 避免纯文档变更触发 CI）。
 
-- [x] TOML 配置文件支持
-- [x] TUI 配置界面
-- [x] 自定义主题
-- [x] 交互式主菜单
-- [x] Claude Code 增强工具
+## 发布流程
 
-## 贡献
+1. 在 `Cargo.toml` 与各 `npm/package.json` 中更新版本号。
+2. 运行 `node npm/scripts/prepare-packages.js <版本>`。
+3. `git tag vX.Y.Z && git push origin vX.Y.Z` 触发 Release workflow。
+4. 配置好 `NPM_TOKEN` 后，CI 会自动发布所有平台 npm 包；或参考 `RELEASING.md` 手动发布。
 
-欢迎贡献！请随时提交 issue 或 pull request。
+## 常见问题
 
-## 相关项目
+- **是否与 Anthropic/88Code 官方有关？** 否，本项目为社区自发适配。
+- **可以不用 npm 吗？** 可以，通过 Release 下载或 `cargo build --release`。
+- **Termux 需要 root 吗？** 不需要，所有文件存放在用户目录。
 
-- [tweakcc](https://github.com/Piebald-AI/tweakcc) - 自定义 Claude Code 主题、思考动词等的命令行工具。
-- [CCometixLine](https://github.com/Haleclipse/CCometixLine) - 原始基于 Rust 的高性能 Claude Code 状态栏工具（上游项目）。
-- [ccline-packycc](https://github.com/ding113/ccline-packycc) - 另一个基于 Rust 的高性能 Claude Code 状态栏工具。
+## 许可与致谢
 
-## 许可证
+- 项目遵循 [MIT 许可证](LICENSE)。
+- 感谢 Haleclipse 与 HoBeedzc 的原始工作，以及 88Code 社区的反馈。
 
-本项目采用 [MIT 许可证](LICENSE)。
-
-## Star History
+## Star 统计
 
 [![Star History Chart](https://api.star-history.com/svg?repos=gary-50/CCometixLine_termux&type=Date)](https://star-history.com/#gary-50/CCometixLine_termux&Date)
