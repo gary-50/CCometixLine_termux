@@ -13,6 +13,10 @@ if (!silent) {
 try {
   const platform = process.platform;
   const arch = process.arch;
+  const isTermux = Boolean(
+    process.env.TERMUX_VERSION ||
+    (process.env.PREFIX && process.env.PREFIX.includes('/com.termux'))
+  );
   const homeDir = os.homedir();
   const claudeDir = path.join(homeDir, '.claude', 'ccline');
 
@@ -47,8 +51,12 @@ try {
       return false;
     }
     
-    if (shouldUseStaticBinary()) {
+    if (arch === 'x64' && shouldUseStaticBinary()) {
       platformKey = 'linux-x64-musl';
+    }
+
+    if (arch === 'arm64') {
+      platformKey = 'linux-arm64';
     }
   }
 
@@ -57,6 +65,7 @@ try {
     'darwin-arm64': '@byebyecode/ccline-88cc-darwin-arm64',
     'linux-x64': '@byebyecode/ccline-88cc-linux-x64',
     'linux-x64-musl': '@byebyecode/ccline-88cc-linux-x64-musl',
+    'linux-arm64': '@byebyecode/ccline-88cc-linux-arm64',
     'win32-x64': '@byebyecode/ccline-88cc-win32-x64',
     'win32-ia32': '@byebyecode/ccline-88cc-win32-x64', // Use 64-bit for 32-bit
   };
@@ -64,7 +73,11 @@ try {
   const packageName = packageMap[platformKey];
   if (!packageName) {
     if (!silent) {
-      console.log(`Platform ${platformKey} not supported for auto-setup`);
+      if (isTermux) {
+        console.log('Detected Termux environment. Auto-setup will be skipped until the ARM64 binary is available locally.');
+      } else {
+        console.log(`Platform ${platformKey} not supported for auto-setup`);
+      }
     }
     process.exit(0);
   }

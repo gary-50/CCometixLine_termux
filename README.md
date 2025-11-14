@@ -23,11 +23,15 @@ The statusline shows: Model | Directory | Git Branch Status | Context Window | A
 ## Features
 
 ### Core Functionality
-- **Git integration** with branch, status, and tracking info  
+- **Git integration** with branch, status, and tracking info
 - **Model display** with simplified Claude model names
 - **Usage tracking** based on transcript analysis
 - **Directory display** showing current workspace
-- **API Quota display** showing current API quota
+- **API Quota display** with intelligent caching and failure recovery
+  - Smart caching mechanism for reliable quota monitoring
+  - Resilient to network interruptions (3-failure tolerance)
+  - 30-second timeout optimized for slow networks
+  - Shows remaining balance in real-time
 - **Minimal design** using Nerd Font icons
 
 ### Interactive TUI Features
@@ -47,7 +51,7 @@ The statusline shows: Model | Directory | Git Branch Status | Context Window | A
 
 ### Quick Install (Recommended)
 
-Install via npm (works on all platforms):
+Install via npm (works on all platforms, including Termux on Android):
 
 ```bash
 # Install globally
@@ -69,6 +73,7 @@ After installation:
 - ✅ Global command `ccline-88cc` is available everywhere
 - ⚙️ Follow the configuration steps below to integrate with Claude Code
 - 🎨 Run `ccline-88cc -c` to open configuration panel for theme selection
+- 📱 Termux users on Android are fully supported (ARM64 static binary)
 
 ### Claude Code Configuration
 
@@ -140,6 +145,16 @@ cp ccline-88cc ~/.claude/ccline/
 chmod +x ~/.claude/ccline/ccline-88cc
 ```
 *Works on any Linux distribution (static, no dependencies)*
+
+#### Termux / Linux ARM64 (Android, Raspberry Pi, etc.)
+```bash
+mkdir -p ~/.claude/ccline
+wget https://github.com/byebye-code/ccline-88cc/releases/latest/download/ccline-88cc-linux-arm64.tar.gz
+tar -xzf ccline-88cc-linux-arm64.tar.gz
+cp ccline-88cc ~/.claude/ccline/
+chmod +x ~/.claude/ccline/ccline-88cc
+```
+*Ships as a musl-linked static binary that runs natively inside Termux and other ARM64 Linux environments*
 
 #### macOS (Intel)
 
@@ -253,17 +268,27 @@ Shows simplified Claude model names:
 Token usage percentage based on transcript analysis with context limit tracking.
 
 ### API Quota Display
-Smart monitoring of API usage:
+Smart monitoring of API usage with advanced reliability features:
 
-- **Usage display**: Shows subscription name and used/total credits (e.g., `Pro $0.06/$20.25`)
+- **Usage display**: Shows subscription name and remaining credits (e.g., `PAYGO $354.27`)
 - **Auto-detection**: Automatically detects the correct API endpoint
 - **Zero configuration**: Just provide your API key, everything else is automatic
+- **Intelligent caching**:
+  - Caches successful API responses to `~/.claude/ccline/quota_cache.json`
+  - Displays cached data when API is temporarily unavailable
+  - Automatic cache updates on successful API calls
+- **Resilient failure handling**:
+  - 30-second timeout for API requests (optimized for slow networks)
+  - Continues showing cached quota for up to 2 consecutive failures
+  - Only displays "Offline" after 3 consecutive API failures
+  - Automatically recovers and resets failure counter on next successful call
+- **Performance**: Fast response time using cached data during temporary network issues
 
-Supports multiple API key sources:
+Supports multiple API key sources (priority order):
 
-- Environment variables: `C88_API_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`
-- Claude Code settings.json
-- Local API key file: `~/.claude/api_key`
+1. Environment variables: `C88_API_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`
+2. Claude Code settings.json (`env.ANTHROPIC_AUTH_TOKEN` or `env.ANTHROPIC_API_KEY`)
+3. Local API key file: `~/.claude/api_key`
 
 ## Configuration
 

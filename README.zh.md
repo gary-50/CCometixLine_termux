@@ -27,7 +27,11 @@
 - **模型显示** 简化的 Claude 模型名称
 - **使用量跟踪** 基于转录文件分析
 - **目录显示** 显示当前工作空间
-- **API 配额显示** 显示当前 API 配额
+- **API 配额显示** 智能缓存和故障恢复
+  - 智能缓存机制，可靠的配额监控
+  - 网络中断时自动容错（可容忍3次失败）
+  - 30秒超时，针对慢速网络优化
+  - 实时显示剩余余额
 - **简洁设计** 使用 Nerd Font 图标
 
 ### 交互式 TUI 功能
@@ -47,7 +51,7 @@
 
 ### 快速安装（推荐）
 
-通过 npm 安装（适用于所有平台）：
+通过 npm 安装（适用于所有平台，包括 Android 上的 Termux）：
 
 ```bash
 # 全局安装
@@ -69,6 +73,7 @@ npm install -g @byebyecode/ccline-88cc --registry https://registry.npmmirror.com
 - ✅ 全局命令 `ccline-88cc` 可在任何地方使用
 - ⚙️ 按照下方提示进行配置以集成到 Claude Code
 - 🎨 运行 `ccline-88cc -c` 打开配置面板进行主题选择
+- 📱 完整支持 Termux（ARM64 静态二进制）
 
 ### Claude Code 配置
 
@@ -140,6 +145,16 @@ cp ccline-88cc ~/.claude/ccline/
 chmod +x ~/.claude/ccline/ccline-88cc
 ```
 *适用于任何 Linux 发行版（静态链接，无依赖）*
+
+#### Termux / Linux ARM64（Android、树莓派等）
+```bash
+mkdir -p ~/.claude/ccline
+wget https://github.com/byebye-code/ccline-88cc/releases/latest/download/ccline-88cc-linux-arm64.tar.gz
+tar -xzf ccline-88cc-linux-arm64.tar.gz
+cp ccline-88cc ~/.claude/ccline/
+chmod +x ~/.claude/ccline/ccline-88cc
+```
+*以 musl 静态方式构建，可直接在 Termux 及其他 ARM64 Linux 环境运行*
 
 #### macOS (Intel)
 
@@ -253,17 +268,27 @@ ccline-88cc --patch ~/.local/share/fnm/node-versions/v24.4.1/installation/lib/no
 基于转录文件分析的令牌使用百分比，包含上下文限制跟踪。
 
 ### API 配额显示
-智能监控 API 使用情况：
+智能监控 API 使用情况，具备高级可靠性特性：
 
-- **额度显示**: 显示套餐名称和已用/总额度 (例如 `Pro $0.06/$20.25`)
+- **额度显示**: 显示套餐名称和剩余额度 (例如 `PAYGO $354.27`)
 - **自动检测**: 自动检测正确的 API 端点
 - **零配置**: 只需提供 API 密钥，其他都是自动的
+- **智能缓存**:
+  - 将成功的 API 响应缓存至 `~/.claude/ccline/quota_cache.json`
+  - API 临时不可用时显示缓存数据
+  - API 调用成功时自动更新缓存
+- **弹性故障处理**:
+  - API 请求超时时间为 30 秒（针对慢速网络优化）
+  - 连续失败 2 次内继续显示缓存的配额信息
+  - 仅在连续 3 次 API 调用失败后才显示 "Offline"
+  - 下次调用成功时自动恢复并重置失败计数器
+- **性能优化**: 临时网络问题时使用缓存数据，响应迅速
 
-支持多种 API 密钥来源：
+支持多种 API 密钥来源（优先级顺序）：
 
-- 环境变量: `C88_API_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`
-- Claude Code settings.json
-- 本地 API 密钥文件: `~/.claude/api_key`
+1. 环境变量: `C88_API_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`
+2. Claude Code settings.json（`env.ANTHROPIC_AUTH_TOKEN` 或 `env.ANTHROPIC_API_KEY`）
+3. 本地 API 密钥文件: `~/.claude/api_key`
 
 ## 配置
 

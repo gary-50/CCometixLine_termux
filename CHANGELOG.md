@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Linux ARM64 / Termux distribution pipeline (static musl release, npm optional dependency, installer detection)
+
 ## [1.0.4] - 2025-08-28
 
 ### Added
@@ -184,4 +189,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Startup time: < 50ms
 - Memory usage: < 10MB
 - Binary size: ~2MB optimized release build
-

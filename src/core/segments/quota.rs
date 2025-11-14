@@ -36,6 +36,16 @@ struct EndpointCache {
     success_count: u32,
 }
 
+// 配额数据缓存
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct QuotaCache {
+    subscription_name: Option<String>,
+    remaining: f64,
+    total: f64,
+    last_update: SystemTime,
+    consecutive_failures: u32,
+}
+
 // 智能端点检测器
 struct SmartEndpointDetector {
     endpoints: Vec<EndpointConfig>,
@@ -82,7 +92,7 @@ impl SmartEndpointDetector {
             .set("accept", "*/*")
             .set("content-type", "application/json")
             .set("Authorization", &bearer_token)
-            .timeout(Duration::from_secs(5))
+            .timeout(Duration::from_secs(30))
             .call();
 
         match result {
@@ -144,6 +154,38 @@ impl QuotaSegment {
         Self
     }
 
+    fn get_cache_file_path() -> PathBuf {
+        if let Some(home) = dirs::home_dir() {
+            home.join(".claude")
+                .join("ccline")
+                .join("quota_cache.json")
+        } else {
+            PathBuf::from("quota_cache.json")
+        }
+    }
+
+    fn load_cache() -> Option<QuotaCache> {
+        let cache_path = Self::get_cache_file_path();
+        if let Ok(content) = fs::read_to_string(cache_path) {
+            serde_json::from_str(&content).ok()
+        } else {
+            None
+        }
+    }
+
+    fn save_cache(cache: &QuotaCache) -> Result<(), Box<dyn std::error::Error>> {
+        let cache_path = Self::get_cache_file_path();
+
+        // 确保目录存在
+        if let Some(parent) = cache_path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+
+        let content = serde_json::to_string_pretty(cache)?;
+        fs::write(cache_path, content)?;
+        Ok(())
+    }
+
     fn load_api_key(&self) -> Option<String> {
         // 优先级：环境变量 > Claude Code settings.json > api_key 文件
 
@@ -199,11 +241,11 @@ impl QuotaSegment {
         None
     }
 
-    fn format_quota(&self, subscription_name: Option<&str>, used: f64, total: f64) -> String {
+    fn format_quota(&self, subscription_name: Option<&str>, remaining: f64) -> String {
         if let Some(name) = subscription_name {
-            format!("{} ${:.2}/${:.2}", name, used, total)
+            format!("{} ${:.2}", name, remaining)
         } else {
-            format!("${:.2}/${:.2}", used, total)
+            format!("${:.2}", remaining)
         }
     }
 
@@ -223,18 +265,31 @@ impl Segment for QuotaSegment {
         {
             let api_key = self.load_api_key()?;
 
-            // 使用静态方法进行端点检测
+            // 加载缓存
+            let mut cache = Self::load_cache();
+
+            // 尝试调用API
             if let Some((endpoint_url, response)) =
                 SmartEndpointDetector::detect_endpoint_static(&api_key)
             {
-                let used = self.calculate_used(&response);
+                // API调用成功
+                let remaining = response.current_credits;
                 let total = response.credit_limit;
-                let quota_display = self.format_quota(response.subscription_name.as_deref(), used, total);
+                let quota_display = self.format_quota(response.subscription_name.as_deref(), remaining);
+
+                // 更新缓存（重置失败计数）
+                let new_cache = QuotaCache {
+                    subscription_name: response.subscription_name.clone(),
+                    remaining,
+                    total,
+                    last_update: SystemTime::now(),
+                    consecutive_failures: 0,
+                };
+                let _ = Self::save_cache(&new_cache);
 
                 let mut metadata = HashMap::new();
-                metadata.insert("used".to_string(), used.to_string());
+                metadata.insert("remaining".to_string(), remaining.to_string());
                 metadata.insert("total".to_string(), total.to_string());
-                metadata.insert("remain".to_string(), response.current_credits.to_string());
                 metadata.insert("endpoint_used".to_string(), endpoint_url);
                 if let Some(name) = &response.subscription_name {
                     metadata.insert("subscription_name".to_string(), name.clone());
@@ -246,7 +301,37 @@ impl Segment for QuotaSegment {
                     metadata,
                 })
             } else {
-                // 所有端点都失败
+                // API调用失败
+                // 增加失败计数
+                if let Some(ref mut cached) = cache {
+                    cached.consecutive_failures += 1;
+                    let _ = Self::save_cache(cached);
+
+                    // 如果连续失败少于3次，显示缓存的数据
+                    if cached.consecutive_failures < 3 {
+                        let quota_display = self.format_quota(
+                            cached.subscription_name.as_deref(),
+                            cached.remaining,
+                        );
+
+                        let mut metadata = HashMap::new();
+                        metadata.insert("remaining".to_string(), cached.remaining.to_string());
+                        metadata.insert("total".to_string(), cached.total.to_string());
+                        metadata.insert("cached".to_string(), "true".to_string());
+                        metadata.insert("failures".to_string(), cached.consecutive_failures.to_string());
+                        if let Some(name) = &cached.subscription_name {
+                            metadata.insert("subscription_name".to_string(), name.clone());
+                        }
+
+                        return Some(SegmentData {
+                            primary: quota_display,
+                            secondary: String::new(),
+                            metadata,
+                        });
+                    }
+                }
+
+                // 连续失败3次或没有缓存，显示Offline
                 let mut metadata = HashMap::new();
                 metadata.insert("status".to_string(), "offline".to_string());
 

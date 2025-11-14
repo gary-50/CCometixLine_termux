@@ -4,15 +4,20 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
-// 1. Priority: Use ~/.claude/ccline/ccline if exists
-const claudePath = path.join(
-  os.homedir(), 
-  '.claude', 
-  'ccline',
-  process.platform === 'win32' ? 'ccline.exe' : 'ccline'
+const isTermux = Boolean(
+  process.env.TERMUX_VERSION ||
+  (process.env.PREFIX && process.env.PREFIX.includes('/com.termux'))
 );
 
-if (fs.existsSync(claudePath)) {
+// 1. Priority: Use user-provided binary inside ~/.claude/ccline if present
+const claudeHome = path.join(os.homedir(), '.claude', 'ccline');
+const claudeCandidates = [
+  path.join(claudeHome, process.platform === 'win32' ? 'ccline.exe' : 'ccline'),
+  path.join(claudeHome, process.platform === 'win32' ? 'ccline-88cc.exe' : 'ccline-88cc')
+];
+
+const claudePath = claudeCandidates.find(candidate => fs.existsSync(candidate));
+if (claudePath) {
   const result = spawnSync(claudePath, process.argv.slice(2), {
     stdio: 'inherit',
     shell: false
@@ -52,8 +57,12 @@ if (platform === 'linux') {
     return false;
   }
   
-  if (shouldUseStaticBinary()) {
+  if (arch === 'x64' && shouldUseStaticBinary()) {
     platformKey = 'linux-x64-musl';
+  }
+
+  if (arch === 'arm64') {
+    platformKey = 'linux-arm64';
   }
 }
 
@@ -62,6 +71,7 @@ const packageMap = {
   'darwin-arm64': '@byebyecode/ccline-88cc-darwin-arm64',
   'linux-x64': '@byebyecode/ccline-88cc-linux-x64',
   'linux-x64-musl': '@byebyecode/ccline-88cc-linux-x64-musl',
+  'linux-arm64': '@byebyecode/ccline-88cc-linux-arm64',
   'win32-x64': '@byebyecode/ccline-88cc-win32-x64',
   'win32-ia32': '@byebyecode/ccline-88cc-win32-x64', // Use 64-bit for 32-bit systems
 };
@@ -69,8 +79,12 @@ const packageMap = {
 const packageName = packageMap[platformKey];
 if (!packageName) {
   console.error(`Error: Unsupported platform ${platformKey}`);
-  console.error('Supported platforms: darwin (x64/arm64), linux (x64), win32 (x64)');
-  console.error('Please visit https://github.com/byebye-code/ccline-88cc for manual installation');
+  if (isTermux) {
+    console.error('Detected Termux environment. Please run `cargo build --release` and copy the binary to ~/.claude/ccline/ccline-88cc.');
+  } else {
+    console.error('Supported platforms: darwin (x64/arm64), linux (x64/arm64), win32 (x64)');
+    console.error('Please visit https://github.com/byebye-code/ccline-88cc for manual installation or building from source.');
+  }
   process.exit(1);
 }
 
